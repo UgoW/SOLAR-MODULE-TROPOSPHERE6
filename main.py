@@ -62,7 +62,7 @@ def on_message(client, userdata, msg):
 
         # LCD
         setRGB(0,255,0)
-        setText_norefresh(f"A0: {moyenne_l1:.2f}; A1: {moyenne_l2:.2f}; A2: {moyenne_l3:.2f}")
+        setText_norefresh(f"A0: {moyenne_l1:.2f}")
 
         print(f"Received JSON on {msg.topic}: {payload_json}")
         print(f"Azimuth: {payload_json.get('azimuth')}, Elevation: {payload_json.get('elevation')}")
