@@ -8,11 +8,8 @@ servomotor0_pin = 3     #Port D5 for servomotor0
 servomotor1_pin = 5
 potentiometer = 2       #Port A2 for potentiometer
 light_sensor1 = 0
-light_sensor2 = 1
-light_sensor3 = 2
 
 pinMode(light_sensor1, "INPUT")
-pinMode(light_sensor2, "INPUT")
 
 # --- Configuration ---
 BROKER = "broker.hivemq.com"
@@ -25,8 +22,6 @@ servoAttach(servomotor1_pin)
 
 # Configuration pour les capteurs
 somme_l1 = 0
-somme_l2 = 0
-somme_l3 = 0
 nb_mesures = 0
 
 debut = time.time()
@@ -41,7 +36,7 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-    global somme_l1, somme_l2, somme_l3, nb_mesures
+    global somme_l1, nb_mesures
     try:
         payload_text = msg.payload.decode("utf-8")
         payload_json = json.loads(payload_text)
@@ -50,19 +45,13 @@ def on_message(client, userdata, msg):
 
         # Light sensor
         l1 = analogRead(light_sensor1)
-        l2 = analogRead(light_sensor2)
-        l3 = analogRead(light_sensor3)
         somme_l1 += l1
-        somme_l2 += l2
-        somme_l3 += l3
         nb_mesures += 1
         moyenne_l1 = somme_l1 / nb_mesures
-        moyenne_l2 = somme_l2 / nb_mesures
-        moyenne_l3 = somme_l3 / nb_mesures
 
         # LCD
         setRGB(0,255,0)
-        setText_norefresh(f"A0: {moyenne_l1:.2f}")
+        setText_norefresh(f"TOM: {moyenne_l1:.2f}")
 
         print(f"Received JSON on {msg.topic}: {payload_json}")
         print(f"Azimuth: {payload_json.get('azimuth')}, Elevation: {payload_json.get('elevation')}")
