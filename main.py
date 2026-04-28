@@ -4,9 +4,8 @@ import json
 import paho.mqtt.client as mqtt
 from grove_rgb_lcd import *
 
-servomotor0_pin = 3     #Port D5 for servomotor0
-servomotor1_pin = 5
-potentiometer = 2       #Port A2 for potentiometer
+servomotor0_pin = 5     #Port D3 for servomotor0
+servomotor1_pin = 3     #Port D5 for servomotor1
 light_sensor1 = 0
 
 pinMode(light_sensor1, "INPUT")
@@ -16,15 +15,18 @@ BROKER = "broker.hivemq.com"
 PORT = 1883
 TOPIC = "junia/solar/data"
 CLIENT_ID = "Receiver"
+
 servoAttach(servomotor0_pin)
 servoAttach(servomotor1_pin)
-
 
 # Configuration pour les capteurs
 somme_l1 = 0
 nb_mesures = 0
 
 debut = time.time()
+
+servoWrite(servomotor0_pin, 90)
+servoWrite(servomotor1_pin, 90)
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -40,8 +42,8 @@ def on_message(client, userdata, msg):
     try:
         payload_text = msg.payload.decode("utf-8")
         payload_json = json.loads(payload_text)
-        servoWrite(servomotor0_pin, payload_json.get('azimuth'))
-        servoWrite(servomotor1_pin, payload_json.get('elevation'))
+        servoWrite(servomotor0_pin, max(0,int(payload_json.get('solar_azimuth', 0))))
+        servoWrite(servomotor1_pin, min(110,int(payload_json.get('solar_elevation'))))
 
         # Light sensor
         l1 = analogRead(light_sensor1)
@@ -54,7 +56,7 @@ def on_message(client, userdata, msg):
         setText_norefresh(f"TOM: {moyenne_l1:.2f}")
 
         print(f"Received JSON on {msg.topic}: {payload_json}")
-        print(f"Azimuth: {payload_json.get('azimuth')}, Elevation: {payload_json.get('elevation')}")
+        print(f"Azimuth: {payload_json.get('solar_azimuth')}, Elevation: {payload_json.get('solar_elevation')}")
     except json.JSONDecodeError:
         print(f"Received non-JSON payload on {msg.topic}: {msg.payload!r}")
 
@@ -70,5 +72,6 @@ try:
 except KeyboardInterrupt:
     print("Stopping...")
     servoDetach(servomotor0_pin)
+    servoDetach(servomotor1_pin)
 finally:
     client.disconnect()
