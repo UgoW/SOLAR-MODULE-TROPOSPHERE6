@@ -8,7 +8,7 @@ TOPIC = "junia/solar/data"
 
 def main():
     tracker = SolarTracker(azimuth_pin=5, elevation_pin=3, light_pin=0)
-    display = LcdDisplay(0, 255, 0)
+    display = LcdDisplay(0, 0, 189)
     mqtt_app = SolarMqttClient(BROKER, 1883, TOPIC, tracker, display)
 
     print("Démarrage du système...")
